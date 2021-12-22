@@ -1,0 +1,44 @@
+version: "2"
+services:
+  code:
+    build:
+      context: docker/code
+    volumes:
+      - "./project:/var/www"
+
+  fpm:
+    build:
+      context: docker/fpm
+      target: dev
+    working_dir: /var/www
+    volumes_from:
+      - code
+    restart: unless-stopped
+
+  cli:
+    build:
+      context: docker/cli
+    working_dir: /var/www
+    tty: true
+    volumes_from:
+      - code
+    volumes:
+      - "~/.composer:/root/.composer"
+    environment:
+      COMPOSER_ALLOW_SUPERUSER: 1
+    restart: unless-stopped
+
+  nginx:
+    build:
+      context: docker/nginx
+      args:
+        ENV: dev
+        DOMAIN: dev.bref
+    working_dir: /var/www
+    volumes_from:
+      - code
+    ports:
+      - "80:80"
+    volumes:
+      - "./volumes/nginx/:/var/log/nginx"
+    restart: unless-stopped

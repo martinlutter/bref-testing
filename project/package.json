@@ -1,0 +1,6 @@
+{
+  "devDependencies": {
+    "@symfony/webpack-encore": "^1.7.0",
+    "serverless-lift": "^1.11.0"
+  }
+}

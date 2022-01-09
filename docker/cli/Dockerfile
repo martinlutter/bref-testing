@@ -2,6 +2,8 @@ FROM php:8.1.0-cli
 
 COPY app.ini /usr/local/etc/php/conf.d/app.ini
 
+RUN rm /bin/sh && ln -s /bin/bash /bin/sh
+
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libfreetype6-dev \
     libjpeg-dev \
@@ -35,8 +37,11 @@ RUN docker-php-ext-enable redis
 
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
-RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash
-RUN nvm install 16
+RUN mkdir /usr/local/nvm
+ENV NVM_DIR /usr/local/nvm
+RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash \
+    && source /usr/local/nvm/nvm.sh \
+    && nvm install 16
 
 # Add wkhtmltopdf
 RUN wget --progress=bar:force -O wktmp https://github.com/wkhtmltopdf/wkhtmltopdf/releases/download/0.12.5/wkhtmltox_0.12.5-1.stretch_amd64.deb

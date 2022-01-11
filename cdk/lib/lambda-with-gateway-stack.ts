@@ -11,21 +11,33 @@ export class LambdaWithGatewayStack extends Stack {
     constructor(scope: Construct, id: string, props?: StackProps) {
         super(scope, id, props);
 
-        const lambdaFunction = new lambda.Function(this, 'bref-testing-function', {
+        const phpLayer = lambda.LayerVersion.fromLayerVersionArn(this, 'lambda-php81-runtime', 'arn:aws:lambda:eu-central-1:209497400698:layer:php-81-fpm:17');
+        const fpmLambda = new lambda.Function(this, 'BrefFpmFunction', {
             runtime: lambda.Runtime.PROVIDED_AL2,
             code: lambda.Code.fromAsset('symfony_src.zip', {
                 assetHashType: AssetHashType.SOURCE
             }),
             handler: 'public/index.php',
-            layers: [
-                lambda.LayerVersion.fromLayerVersionArn(this, 'lambda-php81-runtime', 'arn:aws:lambda:eu-central-1:209497400698:layer:php-81-fpm:17')
-            ],
+            layers: [phpLayer],
             timeout: Duration.seconds(29),
+            memorySize: 512,
+        });
+        const consoleLambda = new lambda.Function(this, 'BrefConsoleFunction', {
+            runtime: lambda.Runtime.PROVIDED_AL2,
+            code: lambda.Code.fromAsset('symfony_src.zip', {
+                assetHashType: AssetHashType.SOURCE
+            }),
+            handler: 'bin/console',
+            layers: [
+                phpLayer,
+                lambda.LayerVersion.fromLayerVersionArn(this, 'lambda-console', 'arn:aws:lambda:eu-central-1:209497400698:layer:console:56')
+            ],
+            timeout: Duration.minutes(2),   //30
             memorySize: 512,
         });
 
         const apiGateway = new apigateway.LambdaRestApi(this, 'bref-testing-api', {
-            handler: lambdaFunction,
+            handler: fpmLambda,
             endpointTypes: [apigateway.EndpointType.REGIONAL],
             deployOptions: {
                 loggingLevel: MethodLoggingLevel.INFO,

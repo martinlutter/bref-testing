@@ -10,6 +10,7 @@ addFilesFromDirectoryToZip(zip, 'templates', '../project/templates');
 addFilesFromDirectoryToZip(zip, 'translations', '../project/translations');
 addFilesFromDirectoryToZip(zip, 'var', '../project/var');
 addFilesFromDirectoryToZip(zip, 'vendor', '../project/vendor');
+addFilesFromDirectoryToZip(zip, 'php', '../project/php');
 zip.folder('public')?.file('index.php', fs.readFileSync('../project/public/index.php', 'utf-8'));
 zip.file('.env', fs.readFileSync('../project/.env', 'utf-8'));
 zip.file('composer.json', fs.readFileSync('../project/composer.json', 'utf-8'));

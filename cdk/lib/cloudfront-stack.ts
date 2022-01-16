@@ -10,12 +10,12 @@ export class CloudfrontStack extends Stack {
     constructor(scope: Construct, id: string, props?: StackProps) {
         super(scope, id, props);
 
-        const cloudfrontOAI = new cloudfront.OriginAccessIdentity(this, 'cloudfront-oai', {
+        const cloudfrontOAI = new cloudfront.OriginAccessIdentity(this, 'CloudfrontOAI', {
             comment: `oai for ${id}`
         });
 
-        const assetBucket = new aws_s3.Bucket(this, 'bref-testing-cdk-asset-bucket', {
-            bucketName: 'bref-testing-cdk-asset-bucket',
+        const assetBucket = new aws_s3.Bucket(this, 'AssetBucket', {
+            bucketName: `${id}-asset-bucket`,
             publicReadAccess: false,
             blockPublicAccess: aws_s3.BlockPublicAccess.BLOCK_ALL,
             removalPolicy: RemovalPolicy.DESTROY,
@@ -29,7 +29,7 @@ export class CloudfrontStack extends Stack {
         }));
         new CfnOutput(this, 'Bucket', {value: assetBucket.bucketName});
 
-        const distribution = new cloudfront.CloudFrontWebDistribution(this, 'bref-testing-cloudfront-distribution', {
+        const distribution = new cloudfront.CloudFrontWebDistribution(this, 'CloudfrontDistribution', {
             defaultRootObject: '',
             originConfigs: [
                 {
@@ -61,7 +61,7 @@ export class CloudfrontStack extends Stack {
         });
         new CfnOutput(this, 'Cloudfront', {value: distribution.distributionDomainName});
 
-        new s3deploy.BucketDeployment(this, 'DeployWithInvalidation', {
+        new s3deploy.BucketDeployment(this, 'AssetBucketDeployment', {
             sources: [s3deploy.Source.asset('../project/public/build')],
             destinationBucket: assetBucket,
             destinationKeyPrefix: 'build/',
